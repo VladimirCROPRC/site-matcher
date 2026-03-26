@@ -1,0 +1,37 @@
+
+<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Site Matcher</title>
+<link rel='stylesheet' href='style.css'>
+<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'>
+<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>
+</head><body>
+<h1>Site Matcher</h1>
+<label for='vdfBox'>Cod VDF</label>
+<input id='vdfBox' placeholder='Cauta Cod VDF'>
+<label for='oroBox'>Code Orange</label>
+<input id='oroBox' placeholder='Cauta Cod ORO'>
+<button onclick='searchVDF()'>Search VDF</button>
+<button onclick='searchORO()'>Search ORO</button>
+<div id='result'></div>
+<div id='map'></div>
+<script>
+let recs=[];
+fetch('data/sites.json').then(r=>r.json()).then(j=>{recs=j});
+function norm(v){return String(v).trim().toLowerCase().replace(/\s+/g,'');}
+let map=L.map('map').setView([45,25],6);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+let marker;
+function run(q,f){let r=recs.filter(x=>norm(x[f])===q);
+let h='';
+if(r.length){let o=r[0];h=`<b>COD VDF:</b> ${o['Cod VDF']||''}<br><b>COD ORO:</b> ${o['Cod ORO']||''}<br><b>Descriere:</b> ${o['Descriere']||''}<br><b>Adresa:</b> ${o['Adresa']||''}`;
+if(marker)marker.remove(); if(o['LatDecimal']&&o['LongDecimal']){
+marker=L.marker([o['LatDecimal'],o['LongDecimal']]).addTo(map);
+map.setView([o['LatDecimal'],o['LongDecimal']],15);
+}}
+else h='Nicio locatie gasita.';
+document.getElementById('result').innerHTML=h;
+}
+function searchVDF(){run(norm(document.getElementById('vdfBox').value),'Cod VDF');}
+function searchORO(){run(norm(document.getElementById('oroBox').value),'Cod ORO');}
+</script>
+</body></html>
